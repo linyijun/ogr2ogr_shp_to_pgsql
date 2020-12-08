@@ -1,3 +1,4 @@
+import argparse
 import os
 
 from common_db import create_table_obj, drop_table, DB_USERNAME, DB_NAME
@@ -38,16 +39,19 @@ def ogr2ogr_from_local(file_path, schema, table_name):
 
 if __name__ == '__main__':
 
-    path = './illinois-latest-free.shp'
-    state_name = 'illinois'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dir', type=str, required=True, help='The path to the shape files.')
+    parser.add_argument('--region_name', type=str, default='', help='The name of the target region.')
+    args = parser.parse_args()
+
     schema = 'openstreetmap2021'
 
-    for r, d, f in os.walk(path):
+    for r, d, f in os.walk(args.dir):
 
         for file in f:
             if file.endswith('.shp'):
 
                 file_path = os.path.join(r, file)
                 feature_name = file.split('_')[1: -2]
-                table_name = '_'.join([state_name] + feature_name)
+                table_name = args.region_name + '_' + '_'.join(feature_name)
                 ogr2ogr_from_local(file_path, schema, table_name)
